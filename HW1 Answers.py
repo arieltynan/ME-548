@@ -207,6 +207,54 @@ def linearize_unicycle_continuous_time_analytic(state, control, time):
         B : A jax.numpy array of size (n,m)
         C : A jax.numpy array of size (n,1)
     '''
+
+    # Get vals from state
+    theta = state[2]
+    v = state[3]
+
+    A = jnp.array([
+        [0, 0, -v *jnp.sin(theta), jnp.cos(theta)], #wrt xdot
+        [0, 0, v *jnp.cos(theta), jnp.sin(theta)], #wrt ydot
+        [0, 0, 0, 0], #wrt omega
+        [0, 0, 0, 0] #wrt accel
+    ])  #cols wrp x, y, theta, v
+
+
+    B = jnp.array([
+        [0, 0], #wrt xdor
+        [0, 0], #wrt ydot
+        [1, 0], #wrt omega
+        [0, 1] #wrt accel
+    ]) #cols wrt omega, accel
+
+    C = jnp.array([0,0,0,0])
+
+    return A, B, C
+
+# b # Evaluate linearized dynamics (analytic)
+
+x0 = np.transpose([0, 0, math.pi/4, 2])
+u0 = np.transpose([0.1,1.])
+time = .1
+#print(linearize_unicycle_continuous_time_analytic(x0, u0, time))
+
+# c # Linearize dynamics using JAX autodiff
+
+def linearize_autodiff(function_name, state, control, time):
+    '''
+    Linearizes the any dynamics using jax autodiff.
+    Inputs:
+        function_name: name of function to be linearized. Takes state, control, and time as inputs.
+        state     : A jax.numpy array of size (n,); the state to linearize about
+        control   : A jax.numpy array of size (m,); the control to linearize about
+        time      : A real scalar; the time to linearize about
+
+    Outputs:
+        A : A jax.numpy array of size (n,n)
+        B : A jax.numpy array of size (n,m)
+        C : A jax.numpy array of size (n,1)
+    '''
+
     func = lambda state, control, time: dynamic_unicycle_ode(state, control, time)
     A = jax.jacobian(func, argnums = 0)(state, control, time)
     B = jax.jacobian(func, argnums = 1)(state, control, time)
@@ -215,10 +263,16 @@ def linearize_unicycle_continuous_time_analytic(state, control, time):
 
     print(A,B,C)
     return A, B, C
+        
 
-# b # Evaluate linearized dynamics (analytic)
+    # test code:
+state = jnp.array([0.0, 0.0, jnp.pi/4, 2.])
+control = jnp.array([0.1, 1.])
+time = 0.
 
-x0 = np.transpose([0, 0, math.pi/4, 2])
-u0 = np.transpose([0.1,1.])
-time = .1
-print(linearize_unicycle_continuous_time_analytic(x0, u0, time))
+A_autodiff, B_autodiff, C_autodiff = linearize_autodiff(continuous_dynamics, state, control, time)
+A_analytic, B_analytic, C_analytic = linearize_unicycle_continuous_time_analytic(state, control, time)
+
+print('A matrices match:', jnp.allclose(A_autodiff, A_analytic))
+print('B matrices match:', jnp.allclose(B_autodiff, B_analytic))
+print('C matrices match:', jnp.allclose(C_autodiff, C_analytic))

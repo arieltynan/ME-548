@@ -108,7 +108,6 @@ plt.axis("equal")
 plt.xlabel("x [m]")
 plt.ylabel("y [m]")
 
-
 # d #
 
 def foo(x, y, z):
@@ -143,3 +142,22 @@ jax.vmap(foo, in_axes=[None, None, 0])(x, y, zs)
 # while 0 is the batch dimension for yx and zs
 jax.vmap(foo, in_axes=[1, 0, 0])(xs, ys, zs)  
 
+state_dim = continuous_dynamics.state_dim
+control_dim = continuous_dynamics.control_dim
+N = 1000
+n_time_steps = 50
+initial_states = jnp.array(np.random.randn(N, state_dim))
+controls = jnp.array(np.random.randn(N, n_time_steps, control_dim))
+
+trajs = jax.vmap(lambda init, u: simulate(runge_kutta_integrator(continuous_dynamics, 0.1), init, u, 0.1))(initial_states, controls)
+
+# plot the trajectories
+# Better way to visualize???
+plt.plot(trajs[:, 0], trajs[:, 1], label=f"dt = {0.1} RK",linestyle='dotted')
+plt.legend()
+plt.grid(alpha=0.4)
+plt.axis("equal")
+plt.xlabel("x [m]")
+plt.ylabel("y [m]")
+plt.show()
+print(trajs)

@@ -276,3 +276,20 @@ A_analytic, B_analytic, C_analytic = linearize_unicycle_continuous_time_analytic
 print('A matrices match:', jnp.allclose(A_autodiff, A_analytic))
 print('B matrices match:', jnp.allclose(B_autodiff, B_analytic))
 print('C matrices match:', jnp.allclose(C_autodiff, C_analytic))
+
+# d # Linearize discrete-time dynamics 
+state = jnp.array([0.0, 0.0, jnp.pi/4, 2.])
+control = jnp.array([0.1, 1.])
+time = 0.1
+
+ARK_autodiff, BRK_autodiff, CRK_autodiff = linearize_autodiff(discrete_dynamics_rk, state, control, time)
+ARK_analytic, BRK_analytic, CRK_analytic = linearize_unicycle_continuous_time_analytic(state, control, time)
+
+AE_autodiff, BE_autodiff, CE_autodiff = linearize_autodiff(discrete_dynamics_euler, state, control, time)
+AE_analytic, BE_analytic, CE_analytic = linearize_unicycle_continuous_time_analytic(state, control, time)
+
+print('A matrices match:', jnp.allclose(ARK_autodiff, AE_analytic))
+print('B matrices match:', jnp.allclose(BRK_autodiff, BE_analytic))
+print('C matrices match:', jnp.allclose(CRK_autodiff, CE_analytic))
+
+# e # 

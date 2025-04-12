@@ -7,6 +7,9 @@ import numpy as np
 import functools
 import cvxpy as cp
 
+
+## PROBLEM 1 a ##
+
 class Dynamics(metaclass=abc.ABCMeta):
     dynamics_func: Callable
     state_dim: int
@@ -21,33 +24,39 @@ class Dynamics(metaclass=abc.ABCMeta):
         return self.dynamics_func(state, control, time)
     
 def dynamic_unicycle_ode(state, control, time):
-    pass
-    return jnp.zeros(4) # update this line
+    x, y, theta, v = state
+    omega, a = control
+
+    dxdt = v*jnp.cos(theta)
+    dydt = v*jnp.sin(theta)
+    dthetadt = omega
+    dvdt = a
+
+    return jnp.array([dxdt, dydt, dthetadt, dvdt])
 
 state_dim = 4
 control_dim = 2
 continuous_dynamics = Dynamics(dynamic_unicycle_ode, state_dim, control_dim)
 
 
-# b #
+# b # Obtaining discrete-time dynamics
 
 def euler_integrate(dynamics, dt):
     # zero-order hold
     def integrator(x, u, t):
-        '''
-        fill code here
-        '''
-        return jnp.zeros_like(x) # update this line
-
+        dx = dynamics(x, u, t)
+        return x + dt * dx
     return integrator
 
 def runge_kutta_integrator(dynamics, dt=0.1):
     # zero-order hold
     def integrator(x, u, t):
-        '''
-        fill code here
-        '''
-        return jnp.zeros_like(x) # update this line
+        k1 = dynamics(x, u, t)
+        k2 = dynamics(x + 0.5 * dt * k1, u, t + 0.5 * dt)
+        k3 = dynamics(x + 0.5 * dt * k2, u, t + 0.5 * dt)
+        k4 = dynamics(x + dt * k3, u, t + dt)
+        return x + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+
 
     return integrator
 

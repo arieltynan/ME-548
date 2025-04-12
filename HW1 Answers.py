@@ -25,8 +25,8 @@ class Dynamics(metaclass=abc.ABCMeta):
     
 def dynamic_unicycle_ode(state, control, time):
     x, y, theta, v = state
-    omega, a = control
-
+    omega = control[0]
+    a = control[1]
     dxdt = v*jnp.cos(theta)
     dydt = v*jnp.sin(theta)
     dthetadt = omega
@@ -56,17 +56,21 @@ def runge_kutta_integrator(dynamics, dt=0.1):
         k3 = dynamics(x + 0.5 * dt * k2, u, t + 0.5 * dt)
         k4 = dynamics(x + dt * k3, u, t + dt)
         return x + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
-
-
     return integrator
 
 # c #
 
 def simulate(dynamics, initial_state, controls, dt):
-    '''
-    fill code here
-    '''
-    return jnp.zeros((1, 4)) # update this line
+    state = initial_state
+    trajectory = [state]
+    time = 0.0
+
+    for u in controls:
+        state = dynamics(state, u, time)
+        trajectory.append(state)
+        time += dt
+
+    return jnp.stack(trajectory)
 
 
 # code to loop over the different integrators and step sizes
@@ -94,10 +98,11 @@ for dt in dts:
     xs_rk = simulate(discrete_dynamics_rk, initial_state, controls, dt)
 
     # plot the trajectories
-    plt.plot(xs_euler[:, 0], xs_euler[:, 1], label=f"dt = {dt} Euler")
-    plt.plot(xs_rk[:, 0], xs_rk[:, 1], label=f"dt = {dt} RK")
+    plt.plot(xs_euler[:, 0], xs_euler[:, 1], label=f"dt = {dt} Euler",linestyle='--')
+    plt.plot(xs_rk[:, 0], xs_rk[:, 1], label=f"dt = {dt} RK",linestyle='dotted')
     plt.legend()
-    
+
+plt.show()    
 plt.grid(alpha=0.4)
 plt.axis("equal")
 plt.xlabel("x [m]")

@@ -161,7 +161,7 @@ plt.grid(alpha=0.4)
 plt.axis("equal")
 plt.xlabel("x [m]")
 plt.ylabel("y [m]")
-#plt.show() # UNCOMMENT FOR GRAPH
+plt.show() # UNCOMMENT FOR GRAPH
 # print(trajs) # UNCOMMENT FOR VALS
 
 # e # 
@@ -293,3 +293,31 @@ print('B matrices match:', jnp.allclose(BRK_autodiff, BE_analytic))
 print('C matrices match:', jnp.allclose(CRK_autodiff, CE_analytic))
 
 # e # 
+
+key = jax.random.PRNGKey(42)  # Set a fixed seed
+n_samples = 1000
+state_dim = 4  # 4-dimensional state
+ctrl_dim = 2  # 2-dimensional control
+
+time = 0.0
+random_states = jax.random.normal(key, shape=(n_samples, state_dim))
+random_controls = jax.random.normal(key, shape=(n_samples, ctrl_dim))
+
+trajs = jax.vmap(lambda init, u: linearize_autodiff(discrete_dynamics_rk, init, u, 0.1))(random_states, random_controls)
+
+# plot the trajectories
+# Better way to visualize???
+plt.clf()
+
+plt.plot(trajs[0][:, 0], trajs[0][:, 1], label=f"Trajectory 0", linestyle='dotted')
+#plt.plot(trajs[1][:, 0], trajs[1][:, 1], label=f"Trajectory 1", linestyle='solid')
+#plt.plot(trajs[2][:, 0], trajs[2][:, 1], label=f"Trajectory 2", linestyle='dashdot')
+
+#plt.plot(trajs[0, :, 0], trajs[1, :, 1], label=f"dt = {0.1} RK", linestyle='dotted')
+plt.legend()
+plt.grid(alpha=0.4)
+plt.axis("equal")
+plt.xlabel("x [m]")
+plt.ylabel("y [m]")
+plt.show() # UNCOMMENT FOR GRAPH
+# print(trajs) # UNCOMMENT FOR VALS

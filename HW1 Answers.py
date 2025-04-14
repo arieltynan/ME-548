@@ -7,7 +7,7 @@ import numpy as np
 import functools
 import cvxpy as cp
 import math
-
+from jax import grad, jit, vmap
 
 ## PROBLEM 1 a ##
 
@@ -155,13 +155,14 @@ trajs = jax.vmap(lambda init, u: simulate(runge_kutta_integrator(continuous_dyna
 
 # plot the trajectories
 # Better way to visualize???
+plt.clf
 plt.plot(trajs[:, 0], trajs[:, 1], label=f"dt = {0.1} RK",linestyle='dotted')
 plt.legend()
 plt.grid(alpha=0.4)
 plt.axis("equal")
 plt.xlabel("x [m]")
 plt.ylabel("y [m]")
-plt.show() # UNCOMMENT FOR GRAPH
+#plt.show() # UNCOMMENT FOR GRAPH
 # print(trajs) # UNCOMMENT FOR VALS
 
 # e # 
@@ -319,5 +320,66 @@ plt.grid(alpha=0.4)
 plt.axis("equal")
 plt.xlabel("x [m]")
 plt.ylabel("y [m]")
-plt.show() # UNCOMMENT FOR GRAPH
+#plt.show() # UNCOMMENT FOR GRAPH
 # print(trajs) # UNCOMMENT FOR VALS
+
+## COME BACK TO 2E GRAPHING ## 
+
+## P3 ## Unconstrained Optimization
+
+# a # Gradient descent on unconstrained optimization problem
+
+def f(x):
+    return (x + 2)**2 + 5*jnp.tanh(x)
+
+plt.clf
+args = np.arange(-6,4,0.01)
+plt.figure(figsize=(8,6))
+plt.plot(args, f(args))
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.title('Objective function')
+plt.grid(alpha=0.3)
+plt.show()
+
+def minimize_with_gradient_descent(func, initial_guess, step_size, convergence_tol=1e-8):
+    '''
+    Minimizes a scalar function of a single variable.
+    Inputs:
+        func              : name of function to be optimized. Takes initial_guess as input.
+        initial_guess     : a real number
+        convergence_tol   : convergence tolerace; when current and next guesses of of optimal x are closer
+                            together than this, algorithm terminates and returns current estimate of optimal x
+
+    Outputs:
+        cur_x : current best estimate of x which minimizes f(x)
+    '''
+
+    next_x = cur_x = initial_guess  #init 
+    current_tol = convergence_tol
+    deriv_func = grad(func)
+    while current_tol >= convergence_tol:
+        
+        next_x = cur_x - step_size * deriv_func(cur_x)
+        current_tol = abs(cur_x - next_x) # calculate new tol
+        cur_x = next_x # update curr
+
+    return cur_x
+
+x_opt = minimize_with_gradient_descent(f, 5.0, 0.1)
+
+
+# output and plot:
+print('optimal x:', x_opt)
+print('optimal value of f(x):', f(x_opt))
+
+args = np.arange(-6,4,0.01)
+plt.figure(figsize=(8,6))
+plt.plot(args, f(args), label='f(x)')
+plt.scatter(x_opt, f(x_opt), zorder=2, color='red', label='optimal point')
+plt.title('x_opt = {:.4f}, f(x_opt) = {:.4f}'.format(x_opt, f(x_opt)))
+plt.grid(alpha=0.3)
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.legend()
+plt.show()

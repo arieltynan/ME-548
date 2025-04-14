@@ -382,4 +382,59 @@ plt.grid(alpha=0.3)
 plt.xlabel('x')
 plt.ylabel('f(x)')
 plt.legend()
+#plt.show()
+
+# b # Applying log-barrier for solving constrained optimization problems
+
+# fill out g(x) so that the statement g(x) < 0 is equivalent to the statement x > 1
+def g(x):
+    return 1 - x
+
+def phi(f, x, g, t):
+    '''
+    Computes phi(x).
+    Inputs:
+        f  : name of f(x) function; takes x as input
+        x  : variable to be optimized
+        g  : constraint function; we want to ensure g(x) <= 0
+        t  : log-barrier weighting parameter
+
+    Outputs:
+        phi(x)
+    '''
+    phi_x = grad(f) - t*jnp.log(-grad(g))
+ 
+
+    next_x = cur_x = 5  #init 
+    current_tol = convergence_tol = 1e-8
+    deriv_func = grad(f)
+    while current_tol >= convergence_tol:
+        next_x = cur_x - step_size * deriv_func(cur_x)
+        current_tol = abs(cur_x - next_x) # calculate new tol
+        cur_x = next_x # update curr
+
+    return cur_x
+
+
+
+
+    return phi_x
+
+x_upper = 4
+dx = 0.01
+f_x_domain = np.arange(-6, x_upper, dx)
+phi_x_domain = np.arange(1.00001, x_upper, dx)
+
+plt.figure(figsize=(8,6))
+plt.plot(f_x_domain, f(f_x_domain), label='f(x)')
+plt.plot(phi_x_domain, phi(f, phi_x_domain, g, 5), label='phi(x), t = 5')
+plt.plot(phi_x_domain, phi(f, phi_x_domain, g, 2), label='phi(x), t = 2')
+plt.plot(phi_x_domain, phi(f, phi_x_domain, g, 0.5), label='phi(x), t = 0.5')
+plt.vlines(1, -10, 40, linestyles='dashed', label='x = 1', color='black')
+plt.xlabel('x')
+plt.grid(alpha=0.3)
+plt.ylabel('f(x), phi(x)')
+plt.title('f(x) and phi(x) vs x')
+plt.legend(loc='upper left')
+# plt.ylim(-10, 40)
 plt.show()

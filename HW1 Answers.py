@@ -402,21 +402,7 @@ def phi(f, x, g, t):
     Outputs:
         phi(x)
     '''
-    phi_x = grad(f) - t*jnp.log(-grad(g))
- 
-
-    next_x = cur_x = 5  #init 
-    current_tol = convergence_tol = 1e-8
-    deriv_func = grad(f)
-    while current_tol >= convergence_tol:
-        next_x = cur_x - step_size * deriv_func(cur_x)
-        current_tol = abs(cur_x - next_x) # calculate new tol
-        cur_x = next_x # update curr
-
-    return cur_x
-
-
-
+    phi_x = f(x) - t*jnp.log(-g(x))
 
     return phi_x
 
@@ -438,3 +424,7 @@ plt.title('f(x) and phi(x) vs x')
 plt.legend(loc='upper left')
 # plt.ylim(-10, 40)
 plt.show()
+
+# c # minimize_with_gradient descent
+
+

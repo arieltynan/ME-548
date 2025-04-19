@@ -426,5 +426,41 @@ plt.legend(loc='upper left')
 plt.show()
 
 # c # minimize_with_gradient descent
+# ========================== hint: lambdas ==============================
+
+def hint_func(arg1, arg2, arg3):
+    return arg1 + 2 * arg2 + arg3
+
+def hint_func_caller(func, arg):
+    return func(arg)
+
+foo = 42
+bar = 100
+
+lambda x: hint_func(foo, x, bar) # this essentially defines a function of x only, that calls hint_func(x, 42, 100)
+
+# hint_func_caller expects a function that takes only one argument. But we can use a lambda expression to
+# "prepopulate" all but one argument of hint_func, "turning it into" an argument of one function:
+
+hint_func_caller(lambda x: hint_func(foo, x, bar), 5) # this will work and give 152
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ hint: lambdas ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+# ========================== hint: functools.partial ==============================
+
+new_func = functools.partial(hint_func, foo, arg3=bar) # this is equivalent to lambda x: hint_func(foo, x, bar)
+new_func(5) # this will give 152
+
+# OR
+
+new_func = functools.partial(hint_func, arg1=foo, arg3=bar) # this is equivalent to lambda x: hint_func(foo, x, bar)
+new_func(arg2=5) # this will give 152
+
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ hint: functools.partial ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+# add you code here
 
 

@@ -334,13 +334,13 @@ def f(x):
 
 plt.clf
 args = np.arange(-6,4,0.01)
-plt.figure(figsize=(8,6))
+#plt.figure(figsize=(8,6))
 plt.plot(args, f(args))
 plt.xlabel('x')
 plt.ylabel('f(x)')
 plt.title('Objective function')
 plt.grid(alpha=0.3)
-plt.show()
+#plt.show()
 
 def minimize_with_gradient_descent(func, initial_guess, step_size, convergence_tol=1e-8):
     '''
@@ -374,7 +374,7 @@ print('optimal x:', x_opt)
 print('optimal value of f(x):', f(x_opt))
 
 args = np.arange(-6,4,0.01)
-plt.figure(figsize=(8,6))
+#plt.figure(figsize=(8,6))
 plt.plot(args, f(args), label='f(x)')
 plt.scatter(x_opt, f(x_opt), zorder=2, color='red', label='optimal point')
 plt.title('x_opt = {:.4f}, f(x_opt) = {:.4f}'.format(x_opt, f(x_opt)))
@@ -411,6 +411,7 @@ dx = 0.01
 f_x_domain = np.arange(-6, x_upper, dx)
 phi_x_domain = np.arange(1.00001, x_upper, dx)
 
+plt.clf
 plt.figure(figsize=(8,6))
 plt.plot(f_x_domain, f(f_x_domain), label='f(x)')
 plt.plot(phi_x_domain, phi(f, phi_x_domain, g, 5), label='phi(x), t = 5')
@@ -424,6 +425,7 @@ plt.title('f(x) and phi(x) vs x')
 plt.legend(loc='upper left')
 # plt.ylim(-10, 40)
 plt.show()
+plt.close
 
 # c # minimize_with_gradient descent
 # ========================== hint: lambdas ==============================
@@ -432,9 +434,17 @@ plt.show()
 
 # f, x, g, t
 x = 5.0
-t = .1
+t = .001 #barrier weight
+step_size = .001
 #new_func = functools.partial(minimize_with_gradient_descent, func=f, initial_guess=x) # this is equivalent to lambda x: hint_func(foo, x, bar)
 #print(new_func(step_size=t)) 
 
 new_phi = lambda x: phi(f, x, g, t)
-print(minimize_with_gradient_descent(new_phi, initial_guess= x, step_size=t))  
+xbar_opt = minimize_with_gradient_descent(new_phi, initial_guess= x, step_size=step_size)
+print(xbar_opt, f(xbar_opt))
+
+
+# The lower the barrier weight, the closer to get to the barrier. 
+# However, verified if the step size isnt sufficently small, the 
+# barrier will be passed and the program will run indefinitely 
+# 

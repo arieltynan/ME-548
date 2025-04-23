@@ -448,3 +448,23 @@ print(xbar_opt, f(xbar_opt))
 # However, verified if the step size isnt sufficently small, the 
 # barrier will be passed and the program will run indefinitely 
 # 
+
+## Problem 4 (cvxpy)
+
+
+A = np.array([
+    [0.707, 0.707, 0],
+    [-1, 0, 0],
+    [0, -1, 0],
+    [0, 0, -1]
+    ])
+
+b = np.array([2, -1, -1, -3])
+X = cp.Variable(3)
+
+constraints = [A @ X <= b]
+
+# Minimizes objective function within Problem
+prob = cp.Problem(cp.Minimize(X[0]**2 + 2 * X[1]**2 + 3.5 * X[2]**2), constraints)
+prob.solve()
+print(X.value)
